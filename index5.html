@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>제출 내역 확인</title>
-  <link rel="stylesheet" href="style6.css" />
+  <title>디자인 가이드 카드 제출</title>
+  <link rel="stylesheet" href="style5.css" />
 </head>
 <body>
   <div class="container">
@@ -20,125 +20,192 @@
 
     <!-- 메인 콘텐츠 -->
     <div class="innerbox">
-      <!-- 왼쪽: 디자인 가이드 카드-->
+      <!-- 왼쪽: 선택된 가이드 카드 미리보기 -->
       <div class="guide-preview">
         <h2>디자인 가이드 카드</h2>
         <div class="cardbox" id="preview-card">
-          <!-- 가이드카드 렌더링 -->
+          <!-- JS로 여기에 index4에서 선택한 카드 내용이 주입됩니다 -->
         </div>
       </div>
 
-      <!-- 오른쪽: 제출된 이미지 & 설명 확인 -->
+      <!-- 오른쪽: 업로드 & 설명 -->
       <div class="submit-zone">
-        <h2>제출 내역</h2>
-        <div class="images" id="submitted-images">
-          <!-- JS로 이미지 여러 장 렌더링 -->
+        <div class="image-upload">
+          <div class="description">
+            <h3>이미지 업로드</h3>
+            <p>해당 과제를 해결할 시각적 결과물을 업로드 하세요.</p>
+          </div>
+          <div class="upload-dropzone" id="dropzone">
+            <span class="placeholder">
+              클릭 또는 드래그하여<br>이미지를 선택하세요
+            </span>
+            <input type="file" id="fileInput" accept="image/*" multiple />
+          </div>
         </div>
-        <div class="submitted-description">
-          <h3>과제 설명</h3>
-          <p id="submitted-text"></p>
+        <div class="task-desc">
+          <div class="description">
+            <h3>과제 설명</h3>
+            <p>해당 과제를 해결하게 된 과정을 작성하세요.</p>
+          </div>
+          <textarea id="description" placeholder="해당 과제를 해결하게 된 과정에 대한 설명을 작성하세요."></textarea>
         </div>
       </div>
     </div>
 
     <div class="floating-nav">
       <button class="prev-btn">← 이전으로</button>
-      <button class="edit-btn">수정하기</button>
+      <button class="next-btn">제출하기</button>
     </div>
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+    import { initializeApp }            from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, doc, getDoc } 
+      from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-    // Firebase 초기화
+    // 1) Firebase 초기화
     const firebaseConfig = {
       apiKey: "AIzaSyD8C0r8KaBck2olZ-6lab7nr3pV3sHtlNM",
       authDomain: "design-cha.firebaseapp.com",
       projectId: "design-cha",
       storageBucket: "design-cha.appspot.com",
       messagingSenderId: "880464166610",
-      appId: "1:880464166610:web:19ef-46c7-bed0-969f06f57594"
+      appId: "1:880464166610:web:85a490dced53ed0e31370b"
     };
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
 
-    // URL에서 submissionId 꺼내기
+    // 2) URL에서 파라미터(id, sourceId) 꺼내기
     const params       = new URLSearchParams(window.location.search);
-    const submissionId = params.get('id');
+    const selectedId   = params.get('id');        // selectedCards 문서 ID
+    const cardSourceId = params.get('sourceId');  // generatedCards 문서 ID
 
-    // “이전으로” 버튼: 무조건 index3.html 로
-    document.querySelector('.prev-btn').addEventListener('click', () => {
-      window.location.href = 'index3.html';
-    });
-
-    // 전체 렌더링
-    async function renderAll() {
-      if (!submissionId) {
-        alert('불러올 제출 내역이 없습니다.');
+    // 3) 미리보기 렌더링
+    async function renderPreview() {
+      const preview = document.getElementById('preview-card');
+      if (!selectedId) {
+        preview.textContent = '불러올 카드가 없습니다.';
         return;
       }
-
-      // 1) submissions에서 가져오기
-      const subSnap = await getDoc(doc(db, 'submissions', submissionId));
-      if (!subSnap.exists()) {
-        document.getElementById('submitted-text').textContent = '제출 문서를 찾을 수 없습니다.';
+      const snap = await getDoc(doc(db, 'selectedCards', selectedId));
+      if (!snap.exists()) {
+        preview.textContent = '카드를 찾을 수 없습니다.';
         return;
       }
-      const sub = subSnap.data();
+      const card = snap.data();
 
-      // 2) selectedCards에서 가이드카드 가져오기
-      const cardSnap = await getDoc(doc(db, 'selectedCards', sub.cardId));
-      const preview  = document.getElementById('preview-card');
-      if (cardSnap.exists()) {
-        const card = cardSnap.data();
-        preview.innerHTML = `
-          <div class="task-bubble fixed">
-            <div class="card-back">
-              <div class="tag">#${card.분류}</div>
-              <h2>${card.과제제목}</h2>
-              <div class="border"></div>
-              <div class="detail-group">
-                <div class="box"><h4>문제점</h4><p>${card.문제점}</p></div>
-                <div class="box"><h4>사용자니즈</h4><p>${card.사용자니즈}</p></div>
-                <div class="box"><h4>해결전략</h4><p>${card.UX해결전략1}</p></div>
-                <div class="box"><h4>추천 UI</h4><p>${card.UX해결전략1_추천UI}</p></div>
-                <div class="box"><h4>참고사례</h4><p>${card.UX해결전략1_참고사례}</p></div>
-              </div>
+      preview.innerHTML = `
+        <div class="task-bubble fixed">
+          <div class="card-back">
+            <div class="tag">#${card.분류}</div>
+            <h2>${card.과제제목}</h2>
+            <div class="border"></div>
+            <div class="detail-group">
+              <div class="box"><h4>문제점</h4><p>${card.문제점}</p></div>
+              <div class="box"><h4>사용자니즈</h4><p>${card.사용자니즈}</p></div>
+              <div class="box"><h4>해결전략</h4><p>${card.UX해결전략1}</p></div>
+              <div class="box"><h4>추천 UI</h4><p>${card.UX해결전략1_추천UI}</p></div>
+              <div class="box"><h4>참고사례</h4><p>${card.UX해결전략1_참고사례}</p></div>
             </div>
-          </div>`;
-      } else {
-        preview.textContent = '연결된 가이드 카드를 불러올 수 없습니다.';
-      }
+          </div>
+        </div>`;
+    }
 
-      // 3) 이미지 갤러리 렌더링 (imageUrls 배열)
-      const imagesContainer = document.getElementById('submitted-images');
-      imagesContainer.innerHTML = '';
-      const imgList = Array.isArray(sub.imageUrls) ? sub.imageUrls : [];
-      if (imgList.length) {
-        imgList.forEach(src => {
+    // 4) 다중 이미지 업로드 & 미리보기 (Base64)
+    const dropzone    = document.getElementById('dropzone');
+    const fileInput   = document.getElementById('fileInput');
+    const placeholder = dropzone.querySelector('.placeholder');
+
+    ['dragenter','dragover'].forEach(evt =>
+      dropzone.addEventListener(evt, e => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      })
+    );
+    ['dragleave','drop'].forEach(evt =>
+      dropzone.addEventListener(evt, e => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+      })
+    );
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('drop', e => {
+      fileInput.files = e.dataTransfer.files;
+      handleFiles();
+    });
+    fileInput.addEventListener('change', handleFiles);
+
+    function handleFiles() {
+      const files = Array.from(fileInput.files);
+      dropzone.querySelectorAll('img.preview').forEach(img => img.remove());
+      placeholder.style.display = 'none';
+
+      files.forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = e => {
           const img = document.createElement('img');
-          img.src       = src;
-          img.className = 'submitted-img';
-          imagesContainer.appendChild(img);
-        });
-      } else {
-        imagesContainer.textContent = '제출된 이미지가 없습니다.';
-      }
-
-      // 4) 설명 렌더링
-      document.getElementById('submitted-text').textContent =
-        sub.description || '제출된 설명이 없습니다.';
-
-      // 5) “수정하기” 버튼: index5로, cardId 와 cardSourceId 함께 전달
-      const editBtn = document.querySelector('.edit-btn');
-      editBtn.addEventListener('click', () => {
-        window.location.href =
-          `index5.html?id=${sub.cardId}&sourceId=${sub.cardSourceId}`;
+          img.className = 'preview';
+          img.src = e.target.result;
+          dropzone.appendChild(img);
+        };
+        reader.readAsDataURL(file);
       });
     }
 
-    window.addEventListener('DOMContentLoaded', renderAll);
+    // 5) 제출하기 & 이전으로
+    document.querySelector('.prev-btn').addEventListener('click', () => {
+      // 뒤로 가면 index4 에 selectedId와 sourceId 유지
+      window.location.href = `index4.html?id=${selectedId}&sourceId=${cardSourceId}`;
+    });
+    document.querySelector('.next-btn').addEventListener('click', submitSolution);
+
+    async function submitSolution() {
+      if (!selectedId || !cardSourceId) {
+        return alert('카드를 불러오지 못했습니다. 다시 시도해 주세요.');
+      }
+      const btn = document.querySelector('.next-btn');
+      btn.disabled    = true;
+      btn.textContent = '저장 중…';
+
+      try {
+        // 과제 설명
+        const description = document.getElementById('description').value.trim();
+
+        // 이미지 Base64
+        const files  = Array.from(fileInput.files);
+        const images = await Promise.all(files.map(file =>
+          new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(file);
+          })
+        ));
+
+        // Firestore 저장
+        const docRef = await addDoc(
+          collection(db, 'submissions'),
+          {
+            cardId:         selectedId,
+            cardSourceId:   cardSourceId,
+            description:    description,
+            imageUrls:      images,
+            createdAt:      new Date()
+          }
+        );
+
+        // index6 로 이동
+        window.location.href = `index6.html?id=${docRef.id}`;
+      } catch (err) {
+        console.error(err);
+        alert('저장 중 오류가 발생했습니다.');
+        btn.disabled    = false;
+        btn.textContent = '제출하기';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', renderPreview);
   </script>
 </body>
 </html>
