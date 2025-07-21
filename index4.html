@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UX 전략 선택</title>
+  <link rel="stylesheet" href="style4.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="nav-bar">
+      <img src="image/logo.png" alt="로고" class="logo">
+      <ul class="menu">
+        <li><a href="#">챌린지</a></li>
+        <li><a href="#">라이브러리</a></li>
+        <li><a href="#">프로필페이지</a></li>
+      </ul>
+    </div>
+
+    <div class="innerbox">
+      <!-- 왼쪽 -->
+      <div class="selectzone">
+        <div class="text">
+          <img src="image/logo2.png" width="80" alt="로고2">
+          <h1>UX 전략을 선택하여<br>디자인 가이드 카드를 생성하세요.</h1>
+        </div>
+        <div class="selectbox">
+          <div class="uxcard" id="uxcard"></div>
+          <img src="image/arrow_left.png" width="16" height="28" alt="화살표">
+          <div class="choice" id="choice"></div>
+        </div>
+      </div>
+
+      <!-- 오른쪽 -->
+      <div class="guidecard">
+        <div class="cardbox">
+          <h2>[네이버 지도 UX/UI 개선 가이드]</h2>
+          <div class="border"></div>
+
+          <div class="carditem">
+            <h3>과제</h3><p id="guide-task"></p>
+          </div>
+          <div class="carditem">
+            <h3>문제점</h3><p id="guide-problem"></p>
+          </div>
+          <div class="carditem">
+            <h3>사용자니즈</h3><p id="guide-need"></p>
+          </div>
+          <div class="carditem">
+            <h3>해결전략</h3><p id="guide-strategy"></p>
+          </div>
+          <div class="carditem">
+            <h3>추천UI</h3><p id="guide-ui"></p>
+          </div>
+          <div class="carditem">
+            <h3>참고사례</h3><p id="guide-case"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="floating-nav">
+      <button class="prev-btn">← 이전으로</button>
+      <button class="next-btn">다음으로 →</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+    // Firebase 초기화
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8C0r8KaBck2olZ-6lab7nr3pV3sHtlNM",
+      authDomain: "design-cha.firebaseapp.com",
+      projectId: "design-cha",
+      storageBucket: "design-cha.firebasestorage.app",
+      messagingSenderId: "880464166610",
+      appId: "1:880464166610:web:85a490dced53ed0e31370b"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    async function loadSelectedCard() {
+      const uxBox  = document.getElementById('uxcard');
+      const choice = document.getElementById('choice');
+      const out = {
+        task:     document.getElementById('guide-task'),
+        problem:  document.getElementById('guide-problem'),
+        need:     document.getElementById('guide-need'),
+        strategy: document.getElementById('guide-strategy'),
+        ui:       document.getElementById('guide-ui'),
+        case:     document.getElementById('guide-case'),
+      };
+
+      // 초기화
+      uxBox.innerHTML = '';
+      choice.innerHTML = '';
+      Object.values(out).forEach(el => el.textContent = '');
+
+      // URL 에서 id 가져오기
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) {
+        uxBox.textContent = '선택된 카드가 없습니다.';
+        return;
+      }
+
+      // Firestore에서 문서 조회
+      const snap = await getDoc(doc(db, 'selectedCards', id));
+      if (!snap.exists()) {
+        uxBox.textContent = '카드를 찾을 수 없습니다.';
+        return;
+      }
+      const card = snap.data();
+
+      // 1) 왼쪽 카드 표시
+      uxBox.innerHTML = `
+        <div class="task-bubble fixed">
+          <div class="card-back">
+            <div class="tag">#${card.분류}</div>
+            <h2>${card.과제제목}</h2>
+            <div class="detail-group">
+              <div class="box"><h4>문제점</h4><p>${card.문제점}</p></div>
+              <div class="box"><h4>사용자니즈</h4><p>${card.사용자니즈}</p></div>
+            </div>
+          </div>
+        </div>`;
+
+      // 2) UX 해결 전략 리스트
+      const strategies = Object.keys(card)
+        .filter(k => k.startsWith('UX해결전략') && !k.includes('_'))
+        .sort()
+        .map(k => card[k]);
+
+      if (!strategies.length) {
+        choice.textContent = '등록된 UX 전략이 없습니다.';
+        return;
+      }
+
+      const ul = document.createElement('ul');
+      ul.className = 'strategy-list';
+      strategies.forEach((text, i) => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        li.addEventListener('click', () => {
+          ul.querySelectorAll('li').forEach(x => x.classList.remove('selected'));
+          li.classList.add('selected');
+          fillGuide(card, i+1, out);
+        });
+        ul.appendChild(li);
+      });
+      choice.appendChild(ul);
+    }
+
+    function fillGuide(card, idx, out) {
+      out.task.textContent     = card.과제제목;
+      out.problem.textContent  = card.문제점;
+      out.need.textContent     = card.사용자니즈;
+      out.strategy.textContent = card[`UX해결전략${idx}`] || '';
+      out.ui.textContent       = card[`UX해결전략${idx}_추천UI`] || '';
+      out.case.textContent     = card[`UX해결전략${idx}_참고사례`] || '';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadSelectedCard();
+
+      // 이전/다음 페이지 이동
+      document.querySelector('.prev-btn').addEventListener('click', () => {
+        location.href = 'index3.html';
+      });
+      document.querySelector('.next-btn').addEventListener('click', () => {
+        const id = new URLSearchParams(window.location.search).get('id');
+        location.href = id
+          ? `index5.html?id=${id}`
+          : 'index5.html';
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+
+html, body {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: 'Pretendard', sans-serif;
+}
+body {
+  background-image: url(image/background.png);
+  background-size: cover;
+  background-position: center;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+}
+
+/*헤더영역*/
+.nav-bar{
+    width: 100%;
+    height: 80px;
+    margin:0;
+    background-color: white;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    padding: 0 40px;
+}
+
+.logo{
+    width: 200px;
+}
+
+.menu{
+    list-style: none;
+    display: flex;
+    gap: 40px;
+    margin: 0 0 0 62px;
+    padding: 0;
+    align-items: center;
+}
+
+.menu li a{
+    text-decoration: none;
+    font-size: 20px;
+    color: #444;
+    transition: color 0.2s ease;;
+}
+
+.menu li a:hover{
+    color: #333;
+    font-weight: 500;
+}
+
+/*웰컴섹션*/
+.welcome-section{
+    margin: 80px auto auto 80px;
+    color: #444;
+}
+.welcome-section h2{
+    margin-bottom: 8px;
+    padding: 0;
+    font-size: 28px;
+    font-weight: 500;
+}
+.welcome-section h1{
+    margin: 0;
+    font-size: 48px;
+    font-weight: 600;
+}
+
+/*카드리스트*/
+.card-list{
+    margin: 52px 0 0 62px;
+}
+.card{
+    display: flex;
+    flex-direction: column;
+
+    width: 340px;
+    height: 340px;
+    padding: 0;
+    background-image: url(image/card_background.png);
+    background-size: cover;
+    background-position: center;
+    border-radius: 24px;
+
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.10);
+    overflow: hidden;
+}
+.card-header{
+    padding-top: 24px;
+    padding-left: 18px;
+}
+.category{
+    border-radius: 100px;
+    font-size: 14px;
+    color: white;
+    background-color: #62E134;
+    padding: 6px 16px;
+}
+.popularity{
+    border-radius: 100px;
+    font-size: 14px;
+    color: white;
+    background-color: #FF6D33;
+    padding: 6px 16px;
+}
+.card-title{
+    font-size: 38px;
+    font-weight: 600;
+    padding-left: 18px;
+    padding-top: 20px;
+}
+
+.card-footer{
+    background: white;
+    display: flex;
+
+    
+    margin-top: auto;
+    margin-bottom: 0;
+    align-items: center;
+    padding: 18px;
+}
+.progress-info{
+    width: 100%;
+    margin-right: 20px;
+}
+.progress-bar{
+    width: 220px;
+    height: 4px;
+    background-color: #A1A1A1;
+
+    overflow: hidden;
+}
+.progress-fill {
+  width: 80%; 
+  height: 100%;
+  background-color: #444;
+}
+.progress-label{
+    margin-bottom: 8px;
+}
+.progress-bar{
+    margin-bottom: 18px;
+}

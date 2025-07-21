@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UX 과제 카드</title>
+  <link rel="stylesheet" href="style3.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="nav-bar">
+      <img src="image/logo.png" alt="로고" class="logo">
+      <ul class="menu">
+        <li><a href="index.html">챌린지</a></li>
+        <li><a href="#">라이브러리</a></li>
+        <li><a href="#">프로필페이지</a></li>
+      </ul>
+    </div>
+
+    <h1 class="page-title">네이버지도 챌린지</h1>
+
+    <!-- 카드가 배치될 영역 -->
+    <div class="card-container" id="cardContainer"></div>
+
+    <div class="floating-nav">
+      <button class="prev-btn" onclick="location.href='index.html'">← 이전으로</button>
+      <button class="next-btn" onclick="goToDetailPage()">다음으로 →</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK 및 초기화 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      deleteDoc,
+      doc
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8C0r8KaBck2olZ-6lab7nr3pV3sHtlNM",
+      authDomain: "design-cha.firebaseapp.com",
+      projectId: "design-cha",
+      storageBucket: "design-cha.firebasestorage.app",
+      messagingSenderId: "880464166610",
+      appId: "1:880464166610:web:85a490dced53ed0e31370b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+    window.db = db;
+    window.addDoc = addDoc;
+    window.collection = collection;
+    window.getDocs = getDocs;
+    window.deleteDoc = deleteDoc;
+    window.doc = doc;
+  </script>
+
+  <script>
+    const APIkey = prompt("OpenAI API Key를 입력하세요");
+
+    window.addEventListener("DOMContentLoaded", fetchAndRenderCards);
+
+    // --- 컬렉션 완전 초기화 유틸 ---
+    async function clearGeneratedCards() {
+      const snap = await window.getDocs(window.collection(window.db, 'generatedCards'));
+      const del = [];
+      snap.forEach(d => del.push(window.deleteDoc(window.doc(window.db, 'generatedCards', d.id))));
+      await Promise.all(del);
+      console.log('generatedCards 초기화 완료');
+    }
+
+    async function fetchAndRenderCards() {
+      // 재생성할지 물어보기
+      if (localStorage.getItem('uxCards') && APIkey) {
+        const regen = confirm('기존 저장된 과제를 지우고 새로 생성하시겠습니까?');
+        if (regen) {
+          localStorage.removeItem('uxCards');
+          localStorage.removeItem('cardsSavedToFirestore');
+          await clearGeneratedCards();
+        }
+      }
+
+      let cards;
+      const saved = localStorage.getItem('uxCards');
+      if (saved) {
+        cards = JSON.parse(saved);
+      } else {
+        // --- 프롬프트 (추천UI, 참고사례 추가 요구) ---
+        const promptText = `
+        당신은 UX/UI 실무 경험을 갖춘 전문가이며, 디자인 전공 학생을 교육하는 교육자입니다.
+
+[조건]
+입력된 실제 사용자 리뷰 데이터를 분석하여, 사용자 불편을 기반으로 한 UX/UI 문제를 도출해라.
+단순 오류, 기술 결함, 데이터 오류 등은 제외한다.
+문제는 반드시 UX 리서치 및 GUI 설계로 해결 가능한 수준이어야 하며,
+반복적으로 나타나는 문제를 우선적으로 다룬다.
+도출된 문제들은 다음의 5가지 사용성 기준에 따라 분류하여 제공한다.
+각 분류에 해당하는 과제가 없다면 해당 항목은 생략한다.
+과제카드의 분류는 **학습용이성**, **사용효율성**, **기억용이성**, **적은오류**, **만족도** 이렇게 5가지로 분류한다.
+UX 전략은 반드시 3개를 제안해야한다. 그리고 각 전략별로 
+- 최소 **1개 이상의 추천 UI**, 
+- 최소 **1개 이상의 참고사례**를 함께 제안해야 한다.
+
+[요청]
+**최소 5개**의 JSON 과제 객체를 배열 형태로 반환하십시오.
+설명은 절대 포함하지 말고, 순수 JSON 배열만 내려주세요.
+
+[사용자 리뷰 데이터]
+"잘 이용하고 있는데 최근 앱이 이상합니다. 식당을 찾아서 세부 정보를 보려고 클릭하고 다시 지도를 보려고 세부정보창을 내리면, 원래 지도 위치에서 세부정보창 올라온 만큼 지도 위치가 바뀝니다.",
+"지하철역을 즐겨찾기해도 메인에서 접근이 어려워요. 검색을 눌러 눌러 들어가야 하고, 자주 가는 장소는 고정해두고 싶은데 불편해요.",
+"메뉴가 너무 복잡해서 매번 헷갈립니다. 자주 사용하는 기능만 따로 모아볼 수 있으면 좋겠습니다.",
+"사전 투표소를 보여준다고 해서 자세히 보기를 눌렀는데, 기사만 나옵니다. 그렇다면 네이버앱은 특정 장소를 목적지로 눌렀을때 일부러 다른 장소(네이버에 이득이 되는 장소)를 거쳐 가도록 경로 안내를 해준다는 의미가 내포되어있다는 것인가요? 바로 수정되어 감사합니다. 네이버 지도 앱은 네이버 지도를 보기위함이 목적이라 주변 음식점 홍보나 정보제공은 괜찮지만 지도와 관계없이 정치적인 뉴스가 지도보다 먼저 띄워지는것에 의문이 생겨 남긴 리뷰였습니다.",
+"네이버 내비 개선 건의드립니다. 1. 신호등 잔여시간 표시 티맵처럼 신호등이 바뀌기까지 남은 시간을(초 단위로) 안내해주시면 좋겠습니다. 2. 경고음 볼륨 개선 음악을 들을 때 경고음이 티맵보다 너무 작게 들립니다. 경고음이 더 크게 나오거나, 볼륨을 따로 조절할 수 있게 해주세요. 이 두 가지 꼭 반영 부탁드립니다.",
+"음성 검색할 때 앱을 켜고 바로 하면 되는데 조금 지났다가 음성 검색 마이크 버튼 누르면 자꾸 오류가 나서 안됩니다. 그럴 때마다 앱을 다시 껐다 켜야 됩니다. 이 문제는 옛날부터 있었는데 그때는 어쩌다 한 번씩 가끔씩 그렷습니다. 문제 해결 부탁드립니다."
+
+[
+  {
+    "분류": "사용 효율성",
+    "과제제목": "즐겨찾기 접근성 향상",
+    "문제점": "즐겨찾기한 장소를 홈에서 바로 접근할 수 없음",
+    "사용자니즈": "자주 사용하는 장소를 빠르게 찾고 싶어함",
+    "UX해결전략1": "홈 화면에 즐겨찾기 섹션 고정",
+    "UX해결전략1_추천UI": "핀·카드",
+    "UX해결전략1_참고사례": "카카오지도",
+    "UX해결전략2": "검색 시 즐겨찾기 우선 노출",
+    "UX해결전략2_추천UI": "핀·카드",
+    "UX해결전략2_참고사례": "구글맵",
+    "UX해결전략3": "추가 조작 없이 바로 다음 행동으로 이행",
+    "UX해결전략3_추천UI": "마커·카드",
+    "UX해결전략3_참고사례": "티맵"
+  }
+  ...
+]
+        `;
+        const res = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers:{
+            "Content-Type":"application/json",
+            "Authorization": `Bearer ${APIkey}`
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [
+              { role:"system", content:"너는 UX 디자이너이며 … 전문가야." },
+              { role:"user",   content: promptText }
+            ],
+            temperature:0.7
+          })
+        });
+        const data = await res.json();
+        const raw = data.choices[0].message.content.trim();
+        const match = raw.match(/\[[\s\S]*\]/);
+        cards = JSON.parse(match[0]);
+        localStorage.setItem('uxCards', JSON.stringify(cards));
+      }
+
+      // --- 최초 5개만 bulk 저장 ---
+      if (!localStorage.getItem('cardsSavedToFirestore')) {
+        for (const c of cards) {
+          await window.addDoc(
+            window.collection(window.db,'generatedCards'),
+            { ...c, createdAt:new Date() }
+          );
+        }
+        localStorage.setItem('cardsSavedToFirestore','true');
+      }
+
+      // --- 카드 렌더링 & cardData 보관 ---
+      const container = document.getElementById("cardContainer");
+      container.innerHTML = "";
+      const limited = cards.slice(0,5);
+      const positions = [
+        {x:5,y:0},{x:15,y:30},{x:35,y:20},{x:55,y:30},{x:70,y:0}
+      ];
+      limited.forEach((card,i)=>{
+        const {x,y}=positions[i];
+        const bubble = document.createElement("div");
+        bubble.className = "task-bubble";
+        bubble.style.left = x+"%";
+        bubble.style.top  = y+"%";
+        bubble.cardData = card;  // ← 여기에 JSON 전체 저장
+        bubble.innerHTML =
+          `<div class="card-front">${card.과제제목}</div>
+           <div class="card-back">
+             <div class="tag">#${card.분류}</div>
+             <h2>${card.과제제목}</h2>
+             <div class="detail-group">
+               <div class="box"><h4>문제점</h4><p>${card.문제점}</p></div>
+               <div class="box"><h4>사용자니즈</h4><p>${card.사용자니즈}</p></div>
+             </div>
+           </div>`;
+        bubble.addEventListener("click", e=>{
+          e.stopPropagation();
+          document.querySelectorAll(".task-bubble.fixed")
+            .forEach(el=>el.classList.remove("fixed"));
+          bubble.classList.toggle("fixed");
+        });
+        container.appendChild(bubble);
+      });
+    }
+
+    // --- 선택된 카드 Firestore 저장 & 페이지 전환 ---
+    async function goToDetailPage(){
+      const opened = document.querySelector(".task-bubble.fixed");
+      if (!opened) { alert("먼저 카드를 선택해주세요."); return; }
+      const selectedCard = {
+        ...opened.cardData,     // UX해결전략1~3 + 추천UI/참고사례 전부 포함
+        createdAt: new Date()
+      };
+      const docRef = await window.addDoc(
+        window.collection(window.db, "selectedCards"),
+        selectedCard
+      );
+      location.href = `index4.html?id=${docRef.id}`;
+    }
+  </script>
+</body>
+</html>

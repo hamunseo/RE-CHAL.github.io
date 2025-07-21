@@ -1,0 +1,251 @@
+
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+
+html, body {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: 'Pretendard', sans-serif;
+}
+body {
+  background: url(image/background.png) center/cover no-repeat;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+}
+
+/* 헤더 */
+.nav-bar {
+  height: 80px;
+  background: white;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+}
+.logo { width: 200px; }
+.menu {
+  list-style: none;
+  display: flex;
+  gap: 40px;
+  margin-left: 62px;
+}
+.menu li a {
+  font-size: 20px;
+  color: #444;
+  text-decoration: none;
+  transition: color .2s;
+}
+.menu li a:hover {
+  color: #333;
+  font-weight: 500;
+}
+
+.innerbox{
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: space-between;
+}
+.guide-preview{
+    width: 40%;
+    padding-left: 80px ;
+    padding-top: 20px;
+    background: rgba(113,189,255,0.15);
+}
+.cardbox {
+  width: 480px;
+  min-height: 600px;
+  padding: 24px 36px;
+  background: white;
+  border-radius: 24px;
+  text-align: center;
+}
+.cardbox h2 { font-size: 32px; }
+.border {
+  width: 96%; height: 6px;
+  background: #E2F2FF;
+  border-radius: 100px;
+  margin: 32px auto;
+}
+
+/* box */
+.box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.box h4,
+.box p {
+  margin: 0;
+}
+.box h4 {
+  background: #63ABF5;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 999px;
+}
+.box p {
+  max-width: 340px;
+  text-align: left;
+  font-size: 16px;
+}
+.tag{
+  width: fit-content;
+  margin: 0 auto;
+  background: #63ABF5;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 999px;
+}
+.border {
+  width: 96%; height: 6px;
+  background: #E2F2FF;
+  border-radius: 100px;
+  margin: 32px auto;
+}
+
+/* ↓↓↓ 추가된 부분 ↓↓↓ */
+
+.submit-zone{
+    width: 60%;
+    padding-left: 100px;
+    padding-top: 40px;
+    
+}
+.image-upload{
+    margin-bottom: 36px;
+}
+/* 이미지 업로드, 과제설명 텍스트 부분 */
+.description{
+    display: flex;
+    gap: 24px;
+    align-items: baseline;
+    height: fit-content;
+    margin-bottom: 16px;
+}
+.description h3{
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+}
+.description p{
+    font-size: 18px;
+    font-weight: 300;
+    margin: 0;
+    color: #858585;
+}
+/* 드롭존 스타일 */
+.upload-dropzone {
+  position: relative;
+  width: 80%;
+  height: 360px;                /* 업로드 영역 높이 */
+  background: #F2F9FF;
+  border-radius: 16px;
+  display: flex;
+  
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: background .2s, border-color .2s;
+}
+
+/* 드래그 오버 시 */
+.upload-dropzone.dragover {
+  background: #E0F0FF;
+  border-color: #28C0F0;
+}
+
+/* 기본 안내 텍스트 */
+.upload-dropzone .placeholder {
+  color: #999;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+/* 드롭존에 로드된 이미지 */
+.upload-dropzone img.preview {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* 실제 input 파일을 드롭존 위에 투명하게 덮어서 클릭 가능하게 */
+#fileInput {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.task-desc textarea {
+  width: 80%;               /* 가로 꽉 채우기 */
+  height: 200px;             /* 원하는 높이 */
+  padding: 20px;             /* 안쪽 여백 */
+  box-sizing: border-box;    /* padding 포함 너비 계산 */
+  
+  background-color: #F0F6FF; /* 연한 하늘색 배경 */
+  border: none;              /* 기본 테두리 제거 */
+  border-radius: 16px;       /* 둥근 모서리 */
+  
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  resize: vertical;          /* 높이만 조절 가능 */
+  
+  outline: none;             /* 포커스 시 기본 아웃라인 제거 */
+  transition: box-shadow .2s ease;
+}
+
+/* 포커스 시 강조 효과 */
+.task-desc textarea:focus {
+  box-shadow: 0 0 0 3px rgba(99, 171, 245, 0.4);
+}
+
+/* 플레이스홀더 색상 */
+.task-desc textarea::placeholder {
+  color: #999;
+}
+
+/* 버튼스타일 */
+.floating-nav {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 40px;
+  z-index: 999;
+  pointer-events: none; /* 버튼만 클릭 가능하도록 */
+}
+
+.floating-nav button {
+  pointer-events: auto;
+  background-color: black;
+  color: white;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 40px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: background-color 0.3s ease;
+}
+
+/* 두번선택 방지 */
+.upload-dropzone input[type="file"] {
+  display: none;
+}

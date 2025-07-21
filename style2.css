@@ -1,0 +1,188 @@
+
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+
+html, body {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: 'Pretendard', sans-serif;
+}
+
+      body {
+        background-image: url(image/background.png);
+        background-size: cover;
+        background-position: center;
+      }
+
+      .container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+
+      .nav-bar {
+        width: 100%;
+        height: 80px;
+        background-color: white;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        padding: 0 40px;
+      }
+
+      .logo {
+        width: 200px;
+      }
+
+      .menu {
+        list-style: none;
+        display: flex;
+        gap: 40px;
+        margin-left: 62px;
+        padding: 0;
+      }
+
+      .menu li a {
+        text-decoration: none;
+        font-size: 20px;
+        color: #444;
+        transition: color 0.2s ease;
+      }
+
+      .menu li a:hover {
+        color: #333;
+        font-weight: 500;
+      }
+
+      .title {
+        height: 220px;
+        width: 100%;
+        display: flex;
+        align-items: flex-end;
+        padding-bottom: 32px;
+      }
+
+      .title h1 {
+        width: 100%;
+        font-size: 48px;
+        font-weight: 500;
+        text-align: center;
+        margin: 0;
+      }
+
+      .review-section {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 24px;
+        overflow: hidden;
+        transition: opacity 0.6s ease;
+      }
+
+     /* 이걸 style2.css에 넣어주세요 */
+    .review-section .column:nth-of-type(2),
+    .review-section .column:nth-of-type(4) {
+    margin-top: 90px;
+    }
+
+
+      .track {
+        width: 348px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        animation: scrollUp 20s linear infinite;
+      }
+
+      @keyframes scrollUp {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-50%); }
+      }
+
+    .floating-btn {
+    position: fixed;
+    left: 50%;
+    bottom: 60px;
+    transform: translateX(-50%);
+    padding: 20px 32px;
+    background-color: #222;
+    color: white;
+    border: none;
+    border-radius: 100px;
+    font-size: 24px;
+    font-weight: 400;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease;
+    z-index: 9999; /* 💥 z-index 확실히 올리기 */
+    display: block; /* 💥 혹시 display: none 되어있는 경우 대비 */
+    opacity: 1; /* 💥 가시성 확보 */
+    }
+      .floating-btn:hover {
+        background-color: #444;
+      }
+
+      .task-section {
+        position: absolute;
+        top: 300px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.6s ease;
+      }
+
+      .task-section.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .task-card {
+        background: #b0f2df;
+        padding: 32px;
+        border-radius: 24px;
+        width: 480px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        animation: fadeInUp 0.6s ease forwards;
+      }
+
+      .task-card .tag {
+        background: #28caaa;
+        color: white;
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 14px;
+        display: inline-block;
+        margin-bottom: 12px;
+      }
+
+      .task-card .box {
+        background: white;
+        padding: 16px;
+        margin-top: 16px;
+        border-radius: 16px;
+      }
+
+.task-bubble {
+      position: absolute;
+      padding: 28px;
+      border-radius: 24px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      animation: fadeInUp 0.6s ease both;
+      width: max-content;
+      max-width: 280px;
+      text-align: center;
+    }
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(40px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
