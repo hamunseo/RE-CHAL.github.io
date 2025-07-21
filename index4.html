@@ -81,6 +81,9 @@
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
 
+    // 전역으로 카드 소스 ID 저장
+    window.cardSourceId = null;
+
     async function loadSelectedCard() {
       const uxBox  = document.getElementById('uxcard');
       const choice = document.getElementById('choice');
@@ -98,23 +101,26 @@
       choice.innerHTML = '';
       Object.values(out).forEach(el => el.textContent = '');
 
-      // URL 에서 id 가져오기
+      // URL에서 selectedCards 문서 ID 꺼내기
       const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
-      if (!id) {
+      const selectedId = params.get('id');
+      if (!selectedId) {
         uxBox.textContent = '선택된 카드가 없습니다.';
         return;
       }
 
-      // Firestore에서 문서 조회
-      const snap = await getDoc(doc(db, 'selectedCards', id));
+      // Firestore에서 selectedCards 조회
+      const snap = await getDoc(doc(db, 'selectedCards', selectedId));
       if (!snap.exists()) {
         uxBox.textContent = '카드를 찾을 수 없습니다.';
         return;
       }
       const card = snap.data();
 
-      // 1) 왼쪽 카드 표시
+      // cardSourceId 전역에 저장
+      window.cardSourceId = card.cardSourceId || null;
+
+      // 1) 왼쪽 UX 카드 렌더링
       uxBox.innerHTML = `
         <div class="task-bubble fixed">
           <div class="card-back">
@@ -127,7 +133,7 @@
           </div>
         </div>`;
 
-      // 2) UX 해결 전략 리스트
+      // 2) 전략 리스트 렌더링
       const strategies = Object.keys(card)
         .filter(k => k.startsWith('UX해결전략') && !k.includes('_'))
         .sort()
@@ -165,15 +171,19 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadSelectedCard();
 
-      // 이전/다음 페이지 이동
+      // 이전으로
       document.querySelector('.prev-btn').addEventListener('click', () => {
-        location.href = 'index3.html';
+        window.location.href = 'index3.html';
       });
+
+      // 다음으로 → index5 에 selectedId(선택된 카드), sourceId(버블 고유 ID) 함께 전달
       document.querySelector('.next-btn').addEventListener('click', () => {
-        const id = new URLSearchParams(window.location.search).get('id');
-        location.href = id
-          ? `index5.html?id=${id}`
-          : 'index5.html';
+        const selectedId = new URLSearchParams(window.location.search).get('id');
+        if (!selectedId || !window.cardSourceId) {
+          alert('카드를 선택하고 전략을 고른 뒤 다음으로 넘어가세요.');
+          return;
+        }
+        window.location.href = `index5.html?id=${selectedId}&sourceId=${window.cardSourceId}`;
       });
     });
   </script>
