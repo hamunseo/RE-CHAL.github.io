@@ -1,4 +1,3 @@
-
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
 
@@ -122,7 +121,7 @@ html, body {
 }
 
 /* 카드 뒷면 상세 */
-.tag {     
+.tag {      
   width: fit-content;
   text-align: center;
   margin: 0 auto ;
@@ -201,4 +200,212 @@ html, body {
 
 .floating-nav button:hover {
   background-color: #333;
+}
+
+
+/* ==========================================
+   추가된 스타일 (기존 코드 변경 없음)
+   ========================================== */
+
+/* focused 연동 (JS의 focused 클래스와 동일 지원) */
+.task-bubble:hover:not(.focused),
+.task-bubble.focused {
+  background: #D9F8ED;
+  z-index: 10;
+  padding: 32px;
+  width: 400px;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-bubble:hover .card-front:not(.focused),
+.task-bubble.focused .card-front {
+  display: none;
+}
+
+.task-bubble:hover .card-back:not(.focused),
+.task-bubble.focused .card-back {
+  display: block;
+}
+
+/* 포커스된 카드 화면 중앙 고정 */
+.task-bubble.focused {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) scale(1.1);
+  z-index: 1001;
+  width: min(70vw, 680px);
+  height: auto;
+}
+
+/* 딤 배경 */
+.card-dimmer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(1.5px);
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+}
+.card-dimmer.show {
+  display: block;
+}
+
+/* X 닫기 버튼 */
+.close-button {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  font-size: 40px;
+  color: white;
+  z-index: 1002;
+  cursor: pointer;
+  display: none;
+}
+
+/* 증거 리뷰 카드 레이아웃 */
+.review-evidence-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.review-card {
+  position: absolute;
+  width: 300px;
+  max-width: 300px;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  padding: 32px 24px;
+  font-size: 18px;
+  color: #444;
+  line-height: 1.6;
+  z-index: 1002;
+  pointer-events: auto;
+}
+
+.review-card .quote {
+  font-size: 28px;
+  color: #888;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.review-card.left-top {
+  top: calc(50% - 220px);
+  left: calc(50% - 670px);
+}
+
+.review-card.left-bottom {
+  top: calc(50% + 20px);
+  left: calc(50% - 670px);
+}
+
+.review-card.right-top {
+  top: calc(50% - 220px);
+  left: calc(50% + 300px);
+}
+
+.review-card.right-bottom {
+  top: calc(50% + 20px);
+  left: calc(50% + 300px);
+}
+
+.quote-icon {
+  width: 32px;
+  height: auto;
+  display: block;
+  margin-bottom: 24px;
+}
+
+/* 카드 인덱스별 테마 색상 지정 */
+.card-0 { background-color: #FFF7D6; }
+.card-0 .tag, .card-0 .box h4 { background-color: #FFDB3B; }
+
+.card-1 { background-color: #FFE9F6; }
+.card-1 .tag, .card-1 .box h4 { background-color: #FF4EB7; }
+
+.card-2 { background-color: #B2F0DB; }
+.card-2 .tag, .card-2 .box h4 { background-color: #2BD79D; }
+
+.card-3 { background-color: #FFDAD7; }
+.card-3 .tag, .card-3 .box h4 { background-color: #FF6558; }
+
+.card-4 { background-color: #D0E7FF; }
+.card-4 .tag, .card-4 .box h4 { background-color: #51A6FF; }
+
+.task-bubble.card-0.focused, .task-bubble.card-0:hover:not(.focused) { background-color: #FFF7D6; }
+.task-bubble.card-1.focused, .task-bubble.card-1:hover:not(.focused) { background-color: #FFE9F6; }
+.task-bubble.card-2.focused, .task-bubble.card-2:hover:not(.focused) { background-color: #B2F0DB; }
+.task-bubble.card-3.focused, .task-bubble.card-3:hover:not(.focused) { background-color: #FFDAD7; }
+.task-bubble.card-4.focused, .task-bubble.card-4:hover:not(.focused) { background-color: #D0E7FF; }
+
+/* 로딩 스피너 */
+.loading-spinner {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 9999;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 6px solid #ccc;
+  border-top: 6px solid #28caaa;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+/* ==========================================
+   증거리뷰 텍스트 및 애니메이션 보완
+   ========================================== */
+
+/* 리뷰 텍스트 세부 처리 (긴 리뷰 대응) */
+.review-card .review-text {
+  font-size: 1.000rem;
+  line-height: 1.6;
+  color: #333;
+  word-break: keep-all;     /* 한글 단어 단위 예쁘게 줄바꿈 */
+  max-height: 18.519vh;     /* 카드 높이를 넘어가면 스크롤 생성 */
+  overflow-y: auto;
+  padding-right: 0.260vw;
+}
+
+/* 스크롤바 미관 개선 */
+.review-card .review-text::-webkit-scrollbar {
+  width: 0.208vw;
+}
+.review-card .review-text::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+/* 리뷰 카드 클릭 시 스르륵 나타나는 등장 효과 */
+.review-card {
+  opacity: 0;
+  transform: translateY(1vh);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.review-card.show {
+  opacity: 1;
+  transform: translateY(0);
 }
